@@ -187,24 +187,36 @@ class S3
 	 * @access private
 	 * @static 
 	 */
-	private static $__signingKeyResource = false;
+  private static $__signingKeyResource = false;
+
+  /**
+   * AWS Session Token, used for Roles based access or access via STS
+   *
+   * @var string
+   * @access public
+   * @static
+   */
+  public static $sessionToken = null;
 
 
 	/**
 	* Constructor - if you're not using the class statically
-	*
+  *
 	* @param string $accessKey Access key
-	* @param string $secretKey Secret key
+  * @param string $secretKey Secret key
 	* @param boolean $useSSL Enable SSL
-	* @param string $endpoint Amazon URI
+  * @param string $endpoint Amazon URI
+  * @param string $sessionToken Session Token
 	* @return void
 	*/
-	public function __construct($accessKey = null, $secretKey = null, $useSSL = false, $endpoint = 's3.amazonaws.com')
+	public function __construct($accessKey = null, $secretKey = null, $useSSL = false, $endpoint = 's3.amazonaws.com', $sessionToken = null)
 	{
 		if ($accessKey !== null && $secretKey !== null)
 			self::setAuth($accessKey, $secretKey);
 		self::$useSSL = $useSSL;
-		self::$endpoint = $endpoint;
+    self::$endpoint = $endpoint;
+    self::$sessionToken = $sessionToken;
+    }
 	}
 
 
@@ -241,8 +253,7 @@ class S3
 	*/
 	public static function hasAuth() {
 		return (self::$__accessKey !== null && self::$__secretKey !== null);
-	}
-
+  }
 
 	/**
 	* Set SSL on or off
@@ -2134,6 +2145,11 @@ final class S3Request
 		$url = (S3::$useSSL ? 'https://' : 'http://') . ($this->headers['Host'] !== '' ? $this->headers['Host'] : $this->endpoint) . $this->uri;
 
 		//var_dump('bucket: ' . $this->bucket, 'uri: ' . $this->uri, 'resource: ' . $this->resource, 'url: ' . $url);
+    
+    // If we have a session token with our keys, try use it
+    $sessionToken = S3::$sessionToken();
+    if ($sessionToken !== null)
+      $this->setAmzHeader("x-amz-security-token", $sessionToken);
 
 		// Basic setup
 		$curl = curl_init();
