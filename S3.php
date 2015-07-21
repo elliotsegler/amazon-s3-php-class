@@ -201,12 +201,12 @@ class S3
 
 	/**
 	* Constructor - if you're not using the class statically
-  *
+	*
 	* @param string $accessKey Access key
-  * @param string $secretKey Secret key
+	* @param string $secretKey Secret key
 	* @param boolean $useSSL Enable SSL
-  * @param string $endpoint Amazon URI
-  * @param string $sessionToken Session Token
+	* @param string $endpoint Amazon URI
+	* @param string $sessionToken Session Token
 	* @return void
 	*/
 	public function __construct($accessKey = null, $secretKey = null, $useSSL = false, $endpoint = 's3.amazonaws.com', $sessionToken = null)
@@ -216,7 +216,6 @@ class S3
 		self::$useSSL = $useSSL;
     self::$endpoint = $endpoint;
     self::$sessionToken = $sessionToken;
-    }
 	}
 
 
@@ -2147,7 +2146,8 @@ final class S3Request
 		//var_dump('bucket: ' . $this->bucket, 'uri: ' . $this->uri, 'resource: ' . $this->resource, 'url: ' . $url);
     
     // If we have a session token with our keys, try use it
-    $sessionToken = S3::$sessionToken();
+    $sessionToken = S3::$sessionToken;
+	print "DEBUG: ".S3::$sessionToken."\n";
     if ($sessionToken !== null)
       $this->setAmzHeader("x-amz-security-token", $sessionToken);
 
